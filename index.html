@@ -3,101 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Starlite Cirebon</title>
+    <title>Dashboard CRUD Starlite Cirebon</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; }
-        h1 { color: #333; }
-        .cards { display: flex; gap: 15px; margin-bottom: 20px; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; }
-        .card h3 { margin: 0 0 10px 0; font-size: 14px; color: #666; }
-        .card div { font-size: 24px; font-weight: bold; color: #2c3e50; }
-        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 20px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; color: #333; }
+        h1 { color: #2c3e50; font-size: 22px; }
+        .cards { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 150px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 13px; color: #666; }
+        .card div { font-size: 22px; font-weight: bold; color: #2c3e50; }
+        
+        .form-container, .search-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #2c3e50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #34495e; }
+        .btn-danger { background-color: #e74c3c; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .btn-warning { background-color: #f39c12; color: white; }
+        .btn-warning:hover { background-color: #d68910; }
+
+        .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
         th { background-color: #2c3e50; color: white; }
         tr:hover { background-color: #f1f1f1; }
+        .action-btns { display: flex; gap: 5px; }
+        .action-btns button { padding: 5px 10px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <h1>SUMMARY PROJECT STARLITE CIREBON</h1>
+    <h1>SUMMARY PROJECT STARLITE CIREBON (CRUD)</h1>
     
+    <!-- Summary Cards -->
     <div class="cards">
         <div class="card">
             <h3>TOTAL CLUSTER</h3>
-            <div>3</div>
+            <div id="totalCluster">0</div>
         </div>
         <div class="card">
             <h3>ON GOING</h3>
-            <div>2</div>
+            <div id="totalOnGoing">0</div>
         </div>
         <div class="card">
             <h3>WAITING SKOM</h3>
-            <div>1</div>
+            <div id="totalWaiting">0</div>
         </div>
     </div>
 
-    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari nama cluster, kecamatan, stasiun...">
+    <!-- Form Input / Edit Data (Create / Update) -->
+    <div class="form-container">
+        <h3 id="formTitle">Tambah Data Cluster Baru</h3>
+        <input type="hidden" id="editIndex" value="">
+        <input type="text" id="project" placeholder="Project (Contoh: STARLITE)" value="STARLITE">
+        <input type="text" id="stasiun" placeholder="Stasiun (Contoh: ST CIREBON)" value="ST CIREBON">
+        <input type="text" id="idCluster" placeholder="ID Cluster (Contoh: CLS-CRB-04)">
+        <input type="text" id="kecamatan" placeholder="Kecamatan">
+        <input type="text" id="namaCluster" placeholder="Nama Cluster / Desa">
+        <select id="finalStatus">
+            <option value="Implementation On Going">Implementation On Going</option>
+            <option value="Waiting Schedule SKOM">Waiting Schedule SKOM</option>
+            <option value="Completed">Completed</option>
+        </select>
+        <button onclick="saveData()" id="saveBtn">Simpan Data</button>
+        <button onclick="resetForm()" style="background-color: #95a5a6;" id="cancelBtn" style="display:none;">Batal</button>
+    </div>
 
-    <table id="dataTable">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Project</th>
-                <th>Stasiun</th>
-                <th>ID Cluster</th>
-                <th>Kecamatan</th>
-                <th>Nama Cluster / Desa</th>
-                <th>Final Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>STARLITE</td>
-                <td>ST CIREBON</td>
-                <td>CLS-CRB-01</td>
-                <td>Kejaksan</td>
-                <td>Kebonbaru</td>
-                <td>Implementation On Going</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>STARLITE</td>
-                <td>ST CIREBON</td>
-                <td>CLS-CRB-02</td>
-                <td>Lemahwungkuk</td>
-                <td>Pegambiran</td>
-                <td>Waiting Schedule SKOM</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>STARLITE</td>
-                <td>ST CIREBON</td>
-                <td>CLS-CRB-03</td>
-                <td>Harjamukti</td>
-                <td>Kalijaga</td>
-                <td>Implementation On Going</td>
-            </tr>
-        </tbody>
-    </table>
+    <!-- Pencarian Data (Read) -->
+    <div class="search-container">
+        <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Cari berdasarkan cluster, kecamatan, stasiun, dll...">
+    </div>
+
+    <!-- Tabel Data -->
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Project</th>
+                    <th>Stasiun</th>
+                    <th>ID Cluster</th>
+                    <th>Kecamatan</th>
+                    <th>Nama Cluster / Desa</th>
+                    <th>Final Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data akan dimuat otomatis lewat JavaScript -->
+            </tbody>
+        </table>
+    </div>
 
     <script>
-        function filterTable() {
-            var input = document.getElementById("searchInput");
-            var filter = input.value.toLowerCase();
-            var table = document.getElementById("dataTable");
-            var tr = table.getElementsByTagName("tr");
+        // Data awal default (bisa diubah/tambah/hapus)
+        let dataCluster = JSON.parse(localStorage.getItem('starliteData')) || [
+            { project: "STARLITE", stasiun: "ST CIREBON", idCluster: "CLS-CRB-01", kecamatan: "Kejaksan", namaCluster: "Kebonbaru", finalStatus: "Implementation On Going" },
+            { project: "STARLITE", stasiun: "ST CIREBON", idCluster: "CLS-CRB-02", kecamatan: "Lemahwungkuk", namaCluster: "Pegambiran", finalStatus: "Waiting Schedule SKOM" },
+            { project: "STARLITE", stasiun: "ST CIREBON", idCluster: "CLS-CRB-03", kecamatan: "Harjamukti", namaCluster: "Kalijaga", finalStatus: "Implementation On Going" }
+        ];
 
-            for (var i = 1; i < tr.length; i++) {
-                var tdText = tr[i].textContent.toLowerCase();
-                if (tdText.indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
+        function saveData() {
+            const index = document.getElementById('editIndex').value;
+            const project = document.getElementById('project').value;
+            const stasiun = document.getElementById('stasiun').value;
+            const idCluster = document.getElementById('idCluster').value;
+            const kecamatan = document.getElementById('kecamatan').value;
+            const namaCluster = document.getElementById('namaCluster').value;
+            const finalStatus = document.getElementById('finalStatus').value;
+
+            if(!idCluster || !kecamatan || !namaCluster) {
+                alert("Mohon isi ID Cluster, Kecamatan, dan Nama Cluster/Desa!");
+                return;
+            }
+
+            const newData = { project, stasiun, idCluster, kecamatan, namaCluster, finalStatus };
+
+            if(index === "") {
+                // CREATE
+                dataCluster.push(newData);
+            } else {
+                // UPDATE
+                dataCluster[index] = newData;
+                document.getElementById('editIndex').value = "";
+                document.getElementById('formTitle').innerText = "Tambah Data Cluster Baru";
+                document.getElementById('saveBtn').innerText = "Simpan Data";
+            }
+
+            localStorage.setItem('starliteData', JSON.stringify(dataCluster));
+            resetForm();
+            renderTable();
+        }
+
+        function renderTable() {
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = "";
+
+            let countOnGoing = 0;
+            let countWaiting = 0;
+            let total = 0;
+
+            dataCluster.forEach((item, index) => {
+                // Hitung statistik card
+                total++;
+                if(item.finalStatus.includes("On Going")) countOnGoing++;
+                if(item.finalStatus.includes("Waiting")) countWaiting++;
+
+                // Filter Pencarian
+                const rowString = `${item.project} ${item.stasiun} ${item.idCluster} ${item.kecamatan} ${item.namaCluster} ${item.finalStatus}`.toLowerCase();
+                if(rowString.includes(searchKeyword)) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${item.project}</td>
+                        <td>${item.stasiun}</td>
+                        <td>${item.idCluster}</td>
+                        <td>${item.kecamatan}</td>
+                        <td>${item.namaCluster}</td>
+                        <td>${item.finalStatus}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-warning" onclick="editData(${index})">Edit</button>
+                                <button class="btn-danger" onclick="deleteData(${index})">Hapus</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
                 }
+            });
+
+            document.getElementById('totalCluster').innerText = total;
+            document.getElementById('totalOnGoing').innerText = countOnGoing;
+            document.getElementById('totalWaiting').innerText = countWaiting;
+        }
+
+        function editData(index) {
+            const item = dataCluster[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('project').value = item.project;
+            document.getElementById('stasiun').value = item.stasiun;
+            document.getElementById('idCluster').value = item.idCluster;
+            document.getElementById('kecamatan').value = item.kecamatan;
+            document.getElementById('namaCluster').value = item.namaCluster;
+            document.getElementById('finalStatus').value = item.finalStatus;
+            
+            document.getElementById('formTitle').innerText = "Edit Data Cluster (Index: " + (index + 1) + ")";
+            document.getElementById('saveBtn').innerText = "Perbarui Data";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteData(index) {
+            if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                dataCluster.splice(index, 1);
+                localStorage.setItem('starliteData', JSON.stringify(dataCluster));
+                renderTable();
             }
         }
+
+        function resetForm() {
+            document.getElementById('idCluster').value = "";
+            document.getElementById('kecamatan').value = "";
+            document.getElementById('namaCluster').value = "";
+            document.getElementById('editIndex').value = "";
+            document.getElementById('formTitle').innerText = "Tambah Data Cluster Baru";
+            document.getElementById('saveBtn').innerText = "Simpan Data";
+        }
+
+        // Jalankan saat pertama kali dibuka
+        renderTable();
     </script>
 
 </body>
