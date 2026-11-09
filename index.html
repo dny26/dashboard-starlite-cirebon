@@ -22,14 +22,25 @@
         .btn-danger:hover { background-color: #c0392b; }
         .btn-warning { background-color: #f39c12; color: white; }
         .btn-warning:hover { background-color: #d68910; }
+        .btn-info { background-color: #3498db; color: white; }
+        .btn-info:hover { background-color: #2980b9; }
 
         .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
         th { background-color: #2c3e50; color: white; }
         tr:hover { background-color: #f1f1f1; }
-        .action-btns { display: flex; gap: 5px; }
+        .action-btns { display: flex; gap: 5px; flex-wrap: wrap; }
         .action-btns button, .action-btns a { padding: 5px 10px; font-size: 12px; }
+
+        /* Modal / Popup Detail */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow: auto; }
+        .modal-content { background-color: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 80%; max-width: 700px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-btn:hover { color: black; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 13px; }
+        .detail-item { background: #f9f9f9; padding: 8px; border-radius: 4px; border-left: 3px solid #2c3e50; }
+        .detail-item strong { display: block; color: #555; font-size: 11px; margin-bottom: 3px; }
     </style>
 </head>
 <body>
@@ -52,24 +63,22 @@
         </div>
     </div>
 
-    <!-- Tombol Tambah Data Terpisah -->
+    <!-- Tombol Tambah Data -->
     <div class="nav-container">
         <a href="tambah.html" class="btn-link">+ Tambah Data Baru</a>
     </div>
 
     <!-- Pencarian Data -->
     <div class="search-container">
-        <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Cari berdasarkan cluster, kecamatan, stasiun, dll...">
+        <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Cari berdasarkan ID, kecamatan, desa, stasiun, dll...">
     </div>
 
-    <!-- Tabel Data -->
+    <!-- Tabel Ringkas (Kolom Penting) -->
     <div class="table-container">
         <table id="dataTable">
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Project</th>
-                    <th>Stasiun</th>
                     <th>ID Cluster</th>
                     <th>Kecamatan</th>
                     <th>Nama Cluster / Desa</th>
@@ -78,17 +87,37 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Data dimuat dari localStorage -->
+                <!-- Data dimuat otomatis -->
             </tbody>
         </table>
     </div>
 
+    <!-- Modal Popup untuk Menampilkan 29 Kolom Lengkap -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 style="color: #2c3e50; font-size: 18px; margin-top: 0;">Detail Lengkap Klaster</h2>
+            <div id="modalBody" class="detail-grid">
+                <!-- Data lengkap akan dimasukkan lewat JS -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        let dataCluster = JSON.parse(localStorage.getItem('starliteData')) || [
-            { project: "STARLITE", stasiun: "ST CIREBON", idCluster: "CLS-CRB-01", kecamatan: "Kejaksan", namaCluster: "Kebonbaru", finalStatus: "Implementation On Going" },
-            { project: "STARLITE", stasiun: "ST CIREBON", idCluster: "CLS-CRB-02", kecamatan: "Lemahwungkuk", namaCluster: "Pegambiran", finalStatus: "Waiting Schedule SKOM" },
-            { project: "STARLITE", stasiun: "ST CIREBON", idCluster: "CLS-CRB-03", kecamatan: "Harjamukti", namaCluster: "Kalijaga", finalStatus: "Implementation On Going" }
+        // Data default mencakup ke-29 atribut lengkap dari Excel
+        let defaultData = [
+            { 
+                project: "STARLITE", stasiun: "ST. ARJAWINANGUN & ST. KERTASEMAYA", idCluster: "CBN-AWN-80720-001", city: "Cirebon", kecamatan: "ARJAWINANGUN", namaCluster: "GEYONGAN", finalStatus: "Implementation On Going", permitStatus: "CH APPROVED", dateBa: "30/10/2026", skomCh: "04/11/2026", permitHp: "704", dokumenPermit: "OGP", apdStatus: "DONE KMZ ONLY", noBaDrm: "IJE/DRM-005/28/09/2026", hpApd: "832", civilStart: "04/11/2026", civilDoneTarget: "30/11/2026", civilDoneActual: "-", civilStatus: "OGP", summaryPercentage: "0.0405", atpDate: "-", hpAbd: "-", targetSubmit: "10/12/2026", actualSubmit: "-", dokumenProjectStatus: "-", reconDate: "-", signedBoq: "-", remark: "-", bav: "-" 
+            },
+            { 
+                project: "STARLITE", stasiun: "ST. ARJAWINANGUN & ST. KERTASEMAYA", idCluster: "CBN-AWN-80720-002", city: "Cirebon", kecamatan: "ARJAWINANGUN", namaCluster: "RAWAGATEL", finalStatus: "Implementation On Going", permitStatus: "CH APPROVED", dateBa: "30/10/2026", skomCh: "04/11/2026", permitHp: "288", dokumenPermit: "OGP", apdStatus: "DONE KMZ ONLY", noBaDrm: "IJE/DRM-005/28/09/2026", hpApd: "288", civilStart: "04/11/2026", civilDoneTarget: "30/11/2026", civilDoneActual: "-", civilStatus: "OGP", summaryPercentage: "0.3216", atpDate: "-", hpAbd: "-", targetSubmit: "10/12/2026", actualSubmit: "-", dokumenProjectStatus: "-", reconDate: "-", signedBoq: "-", remark: "-", bav: "-" 
+            },
+            { 
+                project: "STARLITE", stasiun: "ST. ARJAWINANGUN & ST. KERTASEMAYA", idCluster: "CBN-AWN-80720-003", city: "Cirebon", kecamatan: "ARJAWINANGUN", namaCluster: "JUNGJANG WETAN", finalStatus: "Waiting Schedule SKOM", permitStatus: "CH APPROVED", dateBa: "03/11/2026", skomCh: "07/11/2026", permitHp: "1504", dokumenPermit: "-", apdStatus: "DONE KMZ ONLY", noBaDrm: "IJE/DRM-005/28/09/2026", hpApd: "1440", civilStart: "09/11/2026", civilDoneTarget: "03/12/2026", civilDoneActual: "-", civilStatus: "-", summaryPercentage: "0", atpDate: "-", hpAbd: "-", targetSubmit: "15/12/2026", actualSubmit: "-", dokumenProjectStatus: "-", reconDate: "-", signedBoq: "-", remark: "-", bav: "-" 
+            }
         ];
+
+        let dataCluster = JSON.parse(localStorage.getItem('starliteData')) || defaultData;
 
         function renderTable() {
             const searchKeyword = document.getElementById('searchInput').value.toLowerCase();
@@ -101,22 +130,22 @@
 
             dataCluster.forEach((item, index) => {
                 total++;
-                if(item.finalStatus.includes("On Going")) countOnGoing++;
-                if(item.finalStatus.includes("Waiting")) countWaiting++;
+                if(item.finalStatus && item.finalStatus.toLowerCase().includes("on going")) countOnGoing++;
+                if(item.finalStatus && item.finalStatus.toLowerCase().includes("waiting")) countWaiting++;
 
-                const rowString = `${item.project} ${item.stasiun} ${item.idCluster} ${item.kecamatan} ${item.namaCluster} ${item.finalStatus}`.toLowerCase();
+                const rowString = JSON.stringify(item).toLowerCase();
+                
                 if(rowString.includes(searchKeyword)) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${index + 1}</td>
-                        <td>${item.project}</td>
-                        <td>${item.stasiun}</td>
-                        <td>${item.idCluster}</td>
-                        <td>${item.kecamatan}</td>
-                        <td>${item.namaCluster}</td>
-                        <td>${item.finalStatus}</td>
+                        <td><strong>${item.idCluster || '-'}</strong></td>
+                        <td>${item.kecamatan || '-'}</td>
+                        <td>${item.namaCluster || '-'}</td>
+                        <td>${item.finalStatus || '-'}</td>
                         <td>
                             <div class="action-btns">
+                                <button class="btn-info" onclick="showDetail(${index})">Detail</button>
                                 <a href="tambah.html?edit=${index}" class="btn-warning" style="text-align:center;">Edit</a>
                                 <button class="btn-danger" onclick="deleteData(${index})">Hapus</button>
                             </div>
@@ -131,11 +160,71 @@
             document.getElementById('totalWaiting').innerText = countWaiting;
         }
 
+        function showDetail(index) {
+            const item = dataCluster[index];
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = "";
+
+            // Daftar seluruh kolom agar tampil rapi di popup
+            const keys = [
+                { label: "PROJECT", val: item.project },
+                { label: "STASIUN", val: item.stasiun },
+                { label: "ID CLUSTER", val: item.idCluster },
+                { label: "CITY", val: item.city },
+                { label: "KECAMATAN", val: item.kecamatan },
+                { label: "NAMA CLUSTER / DESA", val: item.namaCluster },
+                { label: "FINAL STATUS", val: item.finalStatus },
+                { label: "PERMIT STATUS", val: item.permitStatus },
+                { label: "DATE BA SOSWAR", val: item.dateBa },
+                { label: "SKOM CH", val: item.skomCh },
+                { label: "PERMIT HP (BA)", val: item.permitHp },
+                { label: "DOKUMEN PERMIT STATUS", val: item.dokumenPermit },
+                { label: "APD STATUS", val: item.apdStatus },
+                { label: "NO BA DRM", val: item.noBaDrm },
+                { label: "HP APD", val: item.hpApd },
+                { label: "CIVIL START ACTUAL", val: item.civilStart },
+                { label: "CIVIL DONE TARGET", val: item.civilDoneTarget },
+                { label: "CIVIL DONE ACTUAL", val: item.civilDoneActual },
+                { label: "CIVIL STATUS", val: item.civilStatus },
+                { label: "SUMMARY % IMPLE", val: item.summaryPercentage },
+                { label: "ATP DATE", val: item.atpDate },
+                { label: "HP ABD", val: item.hpAbd },
+                { label: "TARGET SUBMIT DOKUMEN", val: item.targetSubmit },
+                { label: "ACTUAL SUBMIT DOKUMEN", val: item.actualSubmit },
+                { label: "DOKUMEN PROJECT STATUS", val: item.dokumenProjectStatus },
+                { label: "RECON DATE", val: item.reconDate },
+                { label: "SIGNED BOQ FULL DATE", val: item.signedBoq },
+                { label: "REMARK", val: item.remark },
+                { label: "BAV", val: item.bav }
+            ];
+
+            keys.forEach(k => {
+                const div = document.createElement('div');
+                div.className = 'detail-item';
+                div.innerHTML = `<strong>${k.label}</strong><span>${k.val || '-'}</span>`;
+                modalBody.appendChild(div);
+            });
+
+            document.getElementById('detailModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = "none";
+        }
+
         function deleteData(index) {
             if(confirm("Apakah Anda yakin ingin menghapus data ini?")) {
                 dataCluster.splice(index, 1);
                 localStorage.setItem('starliteData', JSON.stringify(dataCluster));
                 renderTable();
+            }
+        }
+
+        // Tutup modal jika klik di luar kotak popup
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
             }
         }
 
