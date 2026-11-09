@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Input Data Starlite Cirebon</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; color: #333; max-width: 600px; margin-left: auto; margin-right: auto; }
+        h1 { color: #2c3e50; font-size: 22px; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        label { font-weight: bold; font-size: 13px; color: #555; display: block; margin-top: 10px; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button, .btn-secondary { background-color: #2c3e50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; text-align: center; flex: 1; }
+        button:hover, .btn-secondary:hover { background-color: #34495e; }
+        .btn-secondary { background-color: #95a5a6; }
+        .btn-secondary:hover { background-color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+    <h1 id="formTitle">Tambah Data Cluster Baru</h1>
+    
+    <div class="form-container">
+        <input type="hidden" id="editIndex" value="">
+        
+        <label>Project</label>
+        <input type="text" id="project" value="STARLITE">
+        
+        <label>Stasiun</label>
+        <input type="text" id="stasiun" value="ST CIREBON">
+        
+        <label>ID Cluster</label>
+        <input type="text" id="idCluster" placeholder="Contoh: CLS-CRB-04">
+        
+        <label>Kecamatan</label>
+        <input type="text" id="kecamatan" placeholder="Masukkan nama kecamatan">
+        
+        <label>Nama Cluster / Desa</label>
+        <input type="text" id="namaCluster" placeholder="Masukkan nama cluster / desa">
+        
+        <label>Final Status</label>
+        <select id="finalStatus">
+            <option value="Implementation On Going">Implementation On Going</option>
+            <option value="Waiting Schedule SKOM">Waiting Schedule SKOM</option>
+            <option value="Completed">Completed</option>
+        </select>
+
+        <div class="btn-group">
+            <button onclick="saveData()">Simpan Data</button>
+            <a href="index.html" class="btn-secondary">Kembali / Batal</a>
+        </div>
+    </div>
+
+    <script>
+        let dataCluster = JSON.parse(localStorage.getItem('starliteData')) || [];
+        
+        // Cek apakah mode Edit berdasarkan URL parameter (?edit=index)
+        const urlParams = new URLSearchParams(window.location.search);
+        const editIndex = urlParams.get('edit');
+
+        if (editIndex !== null && dataCluster[editIndex]) {
+            document.getElementById('editIndex').value = editIndex;
+            document.getElementById('project').value = dataCluster[editIndex].project;
+            document.getElementById('stasiun').value = dataCluster[editIndex].stasiun;
+            document.getElementById('idCluster').value = dataCluster[editIndex].idCluster;
+            document.getElementById('kecamatan').value = dataCluster[editIndex].kecamatan;
+            document.getElementById('namaCluster').value = dataCluster[editIndex].namaCluster;
+            document.getElementById('finalStatus').value = dataCluster[editIndex].finalStatus;
+            
+            document.getElementById('formTitle').innerText = "Edit Data Cluster";
+        }
+
+        function saveData() {
+            const index = document.getElementById('editIndex').value;
+            const project = document.getElementById('project').value;
+            const stasiun = document.getElementById('stasiun').value;
+            const idCluster = document.getElementById('idCluster').value;
+            const kecamatan = document.getElementById('kecamatan').value;
+            const namaCluster = document.getElementById('namaCluster').value;
+            const finalStatus = document.getElementById('finalStatus').value;
+
+            if(!idCluster || !kecamatan || !namaCluster) {
+                alert("Mohon isi kolom ID Cluster, Kecamatan, dan Nama Cluster terlebih dahulu!");
+                return;
+            }
+
+            const newData = { project, stasiun, idCluster, kecamatan, namaCluster, finalStatus };
+
+            if(index === "") {
+                // Tambah data baru
+                dataCluster.push(newData);
+            } else {
+                // Update data lama
+                dataCluster[index] = newData;
+            }
+
+            localStorage.setItem('starliteData', JSON.stringify(dataCluster));
+            alert("Data berhasil disimpan!");
+            window.location.href = "index.html"; // Kembali ke dashboard utama
+        }
+    </script>
+
+</body>
+</html>
